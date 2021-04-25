@@ -145,7 +145,7 @@ void savebmp(int xspecial, int yspecial){
 	char filename[9];
 //	
 //	sprintf(filename, "%s_%dx%d_n%d.bmp", OUTFILE, xsize, ysize, numin);
-	string file = "maze.bmp";
+	string file = "maze" + to_string(counter) + ".bmp";
 	strcpy(filename, file.c_str());
 
 	
@@ -202,5 +202,7 @@ void savebmp(int xspecial, int yspecial){
 //		}
 //	}
 	fclose(outfile);
+	
+	counter++;
 	return;
 }

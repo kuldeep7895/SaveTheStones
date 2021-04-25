@@ -17,12 +17,14 @@ using namespace std;
 
 #define nodeadend//generate a maze without any dead ends! (consequently, many solutions to maze)
 #define prim    //enable this to generate mazes using prim's algorithm.
-#define backtrack//enable this to generate mazes using depth-first search. Don't enable both.
-//#define movie   //this option spams bitmaps to illustrate each step of generation.
+//#define backtrack//enable this to generate mazes using depth-first search. Don't enable both.
+#define movie   //this option spams bitmaps to illustrate each step of generation.
 
 long numin=1;     //Number of cells in the maze.
 const int xsize=20;
 const int ysize=20;
+
+int counter = 0;
 
 void initialize();
 void generate();
