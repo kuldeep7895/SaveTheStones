@@ -118,3 +118,34 @@ void Visit( int x, int y )
 	 }
 
 }
+
+void createMaze()
+{
+
+	 // Displays the finished maze to the screen.
+	 
+	 for (int y=0; y<GRID_HEIGHT; ++y)
+	 {
+		 
+		 for (int x=0; x<GRID_WIDTH; ++x)
+		 {
+		 	if(x == 1 && y == 0)
+		 		grid[XYToIndex(x,y)].info = ' ';
+		 	//cout << grid[XYToIndex(x,y)];
+		 	
+		 	grid[XYToIndex(x,y)].box.x = 40 + (SCREEN_WIDTH / 40)*x;
+			grid[XYToIndex(x,y)].box.y = 40 + (SCREEN_WIDTH / 40)*y;
+			grid[XYToIndex(x,y)].box.w = SCREEN_WIDTH / 40;
+			grid[XYToIndex(x,y)].box.h = SCREEN_WIDTH / 40;
+		 	
+		 	//cout << x << " " << y << " " << grid[XYToIndex(x,y)].x_coor << " " << grid[XYToIndex(x,y)].y_coor << " " << grid[XYToIndex(x,y)].width << " " << grid[XYToIndex(x,y)].height << " " << grid[XYToIndex(x,y)].color << endl;
+		 
+		 }
+		 
+		// cout << endl;
+	 
+	 }
+	 
+//	 cout << endl;
+
+}

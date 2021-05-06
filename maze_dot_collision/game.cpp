@@ -46,6 +46,12 @@ class LTexture
 		int mHeight;
 };
 
+//Scene textures
+LTexture gDotTexture;
+LTexture gStoneTexture;
+
+vector<int> getPos();
+
 //The dot that will move around on the screen
 class Dot
 {
@@ -68,6 +74,11 @@ class Dot
 
 		//Shows the dot on the screen
 		void render();
+		
+		int num_stones;
+		
+		//Dot's collision box
+		SDL_Rect mCollider;
 
     private:
 		//The X and Y offsets of the dot
@@ -76,9 +87,120 @@ class Dot
 		//The velocity of the dot
 		int mVelX, mVelY;
 		
+};
+
+class Stone
+{
+    public:
+		//The dimensions of the dot
+		static const int DOT_WIDTH = 20;
+		static const int DOT_HEIGHT = 20;
+
+		bool pick;
+
+		//Initializes the variables
+		Stone()
+		{
+	
+			vector<int> pos = getPos();
+			
+			cout << "Constructor" << "\t" << pos[0] << "\t" << pos[1] << endl;
+			
+			//Initialize the offsets
+		    	mPosX = pos[0];
+		    	mPosY = pos[1];
+
+			//Set collision box dimension
+			mCollider.w = DOT_WIDTH;
+			mCollider.h = DOT_HEIGHT;
+			mCollider.x = mPosX;
+			mCollider.y = mPosY;
+			
+			pick = false;
+
+		}
+
+		//Moves the dot and checks collision
+		bool check(Dot d)
+		{
+
+			if(!pick)
+			{
+
+				//The sides of the rectangles
+				int leftA, leftB;
+				int rightA, rightB;
+				int topA, topB;
+				int bottomA, bottomB;
+
+				//Calculate the sides of rect A
+				leftA = d.mCollider.x;
+				rightA = d.mCollider.x + d.mCollider.w;
+				topA = d.mCollider.y;
+				bottomA = d.mCollider.y + d.mCollider.h;
+
+				//Calculate the sides of rect B
+				leftB = mCollider.x;
+				rightB = mCollider.x + mCollider.w;
+				topB = mCollider.y;
+				bottomB = mCollider.y + mCollider.h;
+							
+				//If any of the sides from A are outside of B
+				if( bottomA <= topB )
+				{
+							
+					return false;
+					
+				}
+
+				if( topA >= bottomB )
+				{
+				
+					return false;
+						
+				}
+
+				if( rightA <= leftB )
+				{
+							
+					return false;
+							
+				}
+
+				if( leftA >= rightB )
+				{
+							
+					return false;
+							
+				}
+
+				//If none of the sides from A are outside B
+				pick = true;
+				return true;
+			
+			}
+
+		}
+
+		//Shows the dot on the screen
+		
+		void render()
+		{
+		    //Show the stone
+		    if(!pick)
+			gStoneTexture.render( mPosX, mPosY );
+		}
+
+   
+		//The X and Y offsets of the dot
+		int mPosX, mPosY;
+		
+
+		
 		//Dot's collision box
 		SDL_Rect mCollider;
 };
+
 
 //Box collision detector
 bool checkCollision( SDL_Rect a);
@@ -88,9 +210,6 @@ SDL_Window* gWindow = NULL;
 
 //The window renderer
 SDL_Renderer* gRenderer = NULL;
-
-//Scene textures
-LTexture gDotTexture;
 
 LTexture::LTexture()
 {
@@ -240,6 +359,45 @@ int LTexture::getHeight()
 	return mHeight;
 }
 
+vector<int> getPos()
+{
+	
+	//srand(time(0));
+	
+	vector<int> a;	
+		
+	int x = rand();
+	x = rand() % GRID_WIDTH;
+	int y = rand();
+	y = rand() % GRID_HEIGHT;
+	
+	cout << "Fun1" << "\t" << x << "\t\t" << y << endl;
+	
+	while((grid[XYToIndex(x, y)].info == '#') || (grid[XYToIndex(x, y)].info == '.'))
+	{
+			
+		x = rand();
+		x = rand() % GRID_WIDTH;
+		y = rand();
+		y = rand() % GRID_HEIGHT;	
+		
+		cout << "Fun2" << "\t" << x << "\t\t" << y << endl;	
+			
+	}
+	
+	grid[XYToIndex(x, y)].info == '.';
+	
+	cout << "Fun3" << "\t" << x << "\t\t" << y << endl;
+	
+	a.push_back(grid[XYToIndex(x, y)].box.x);
+	a.push_back(grid[XYToIndex(x, y)].box.y);
+	
+	cout << "Fun4" << "\t" << a[0] << "\t\t" << a[1] << endl;
+	
+	return a;
+
+}
+
 Dot::Dot()
 {
     //Initialize the offsets
@@ -253,6 +411,8 @@ Dot::Dot()
     //Initialize the velocity
     mVelX = 0;
     mVelY = 0;
+    
+    num_stones = 0;
 }
 
 void Dot::handleEvent( SDL_Event& e )
@@ -287,26 +447,26 @@ void Dot::move()
 {
     //Move the dot left or right
     mPosX += mVelX;
-	mCollider.x = mPosX;
+    mCollider.x = mPosX;
 
     //If the dot collided or went too far to the left or right
     if( ( mPosX < 0 ) || ( mPosX + DOT_WIDTH > SCREEN_WIDTH ) || checkCollision(mCollider) )
     {
         //Move back
         mPosX -= mVelX;
-		mCollider.x = mPosX;
+	mCollider.x = mPosX;
     }
 
     //Move the dot up or down
     mPosY += mVelY;
-	mCollider.y = mPosY;
+    mCollider.y = mPosY;
 
     //If the dot collided or went too far up or down
     if( ( mPosY < 0 ) || ( mPosY + DOT_HEIGHT > SCREEN_HEIGHT ) || checkCollision( mCollider) )
     {
         //Move back
         mPosY -= mVelY;
-		mCollider.y = mPosY;
+	mCollider.y = mPosY;
     }
 }
 
