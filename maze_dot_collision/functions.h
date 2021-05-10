@@ -2,9 +2,13 @@
 #include <fstream>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
+#include <SDL2/SDL_ttf.h>
 #include <stdio.h>
 #include <string>
 #include <cmath>
+#include <time.h>
+#include <vector>
+#include <sstream>
 
 using namespace std;
 
@@ -24,7 +28,7 @@ const int SCREEN_HEIGHT = 800;
 
 struct Cell {
 	
-	SDL_Rect box;
+	SDL_Rect box;  //x, y, w, h
 	char info;
 
 };
@@ -39,3 +43,4 @@ void ResetGrid();
 int XYToIndex( int x, int y );
 int IsInBounds( int x, int y );
 void Visit( int x, int y );
+void createMaze();
