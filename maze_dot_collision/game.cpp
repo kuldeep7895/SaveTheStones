@@ -1,206 +1,4 @@
-#include "functions.h"
-
-//Texture wrapper class
-class LTexture
-{
-	public:
-		//Initializes variables
-		LTexture();
-
-		//Deallocates memory
-		~LTexture();
-
-		//Loads image at specified path
-		bool loadFromFile( std::string path );
-		
-		#if defined(SDL_TTF_MAJOR_VERSION)
-		//Creates image from font string
-		bool loadFromRenderedText( std::string textureText, SDL_Color textColor );
-		#endif
-
-		//Deallocates texture
-		void free();
-
-		//Set color modulation
-		void setColor( Uint8 red, Uint8 green, Uint8 blue );
-
-		//Set blending
-		void setBlendMode( SDL_BlendMode blending );
-
-		//Set alpha modulation
-		void setAlpha( Uint8 alpha );
-		
-		//Renders texture at given point
-		void render( int x, int y, SDL_Rect* clip = NULL, double angle = 0.0, SDL_Point* center = NULL, SDL_RendererFlip flip = SDL_FLIP_NONE );
-
-		//Gets image dimensions
-		int getWidth();
-		int getHeight();
-
-	private:
-		//The actual hardware texture
-		SDL_Texture* mTexture;
-
-		//Image dimensions
-		int mWidth;
-		int mHeight;
-};
-
-//Scene textures
-LTexture gDotTexture;
-LTexture gStoneTexture;
-
-vector<int> getPos();
-
-//The dot that will move around on the screen
-class Dot
-{
-    public:
-		//The dimensions of the dot
-		static const int DOT_WIDTH = 20;
-		static const int DOT_HEIGHT = 20;
-
-		//Maximum axis velocity of the dot
-		static const int DOT_VEL = 2;
-
-		//Initializes the variables
-		Dot();
-
-		//Takes key presses and adjusts the dot's velocity
-		void handleEvent( SDL_Event& e );
-
-		//Moves the dot and checks collision
-		void move();
-
-		//Shows the dot on the screen
-		void render();
-		
-		int num_stones;
-		
-		//Dot's collision box
-		SDL_Rect mCollider;
-
-    private:
-		//The X and Y offsets of the dot
-		int mPosX, mPosY;
-
-		//The velocity of the dot
-		int mVelX, mVelY;
-		
-};
-
-class Stone
-{
-    public:
-		//The dimensions of the dot
-		static const int DOT_WIDTH = 20;
-		static const int DOT_HEIGHT = 20;
-
-		bool pick;
-
-		//Initializes the variables
-		Stone()
-		{
-	
-			vector<int> pos = getPos();
-			
-			cout << "Constructor" << "\t" << pos[0] << "\t" << pos[1] << endl;
-			
-			//Initialize the offsets
-		    	mPosX = pos[0];
-		    	mPosY = pos[1];
-
-			//Set collision box dimension
-			mCollider.w = DOT_WIDTH;
-			mCollider.h = DOT_HEIGHT;
-			mCollider.x = mPosX;
-			mCollider.y = mPosY;
-			
-			pick = false;
-
-		}
-
-		//Moves the dot and checks collision
-		bool check(Dot d)
-		{
-
-			if(!pick)
-			{
-
-				//The sides of the rectangles
-				int leftA, leftB;
-				int rightA, rightB;
-				int topA, topB;
-				int bottomA, bottomB;
-
-				//Calculate the sides of rect A
-				leftA = d.mCollider.x;
-				rightA = d.mCollider.x + d.mCollider.w;
-				topA = d.mCollider.y;
-				bottomA = d.mCollider.y + d.mCollider.h;
-
-				//Calculate the sides of rect B
-				leftB = mCollider.x;
-				rightB = mCollider.x + mCollider.w;
-				topB = mCollider.y;
-				bottomB = mCollider.y + mCollider.h;
-							
-				//If any of the sides from A are outside of B
-				if( bottomA <= topB )
-				{
-							
-					return false;
-					
-				}
-
-				if( topA >= bottomB )
-				{
-				
-					return false;
-						
-				}
-
-				if( rightA <= leftB )
-				{
-							
-					return false;
-							
-				}
-
-				if( leftA >= rightB )
-				{
-							
-					return false;
-							
-				}
-
-				//If none of the sides from A are outside B
-				pick = true;
-				return true;
-			
-			}
-
-		}
-
-		//Shows the dot on the screen
-		
-		void render()
-		{
-		    //Show the stone
-		    if(!pick)
-			gStoneTexture.render( mPosX, mPosY );
-		}
-
-   
-		//The X and Y offsets of the dot
-		int mPosX, mPosY;
-		
-
-		
-		//Dot's collision box
-		SDL_Rect mCollider;
-};
-
+#include "game.h"
 
 //Box collision detector
 bool checkCollision( SDL_Rect a);
@@ -210,6 +8,9 @@ SDL_Window* gWindow = NULL;
 
 //The window renderer
 SDL_Renderer* gRenderer = NULL;
+
+//Globally used font
+TTF_Font* gFont = NULL;
 
 LTexture::LTexture()
 {
@@ -359,6 +160,114 @@ int LTexture::getHeight()
 	return mHeight;
 }
 
+
+//......................................................................................
+
+
+LTimer::LTimer()
+{
+    //Initialize the variables
+    mStartTicks = 0;
+    mPausedTicks = 0;
+
+    mPaused = false;
+    mStarted = false;
+}
+
+void LTimer::start()
+{
+    //Start the timer
+    mStarted = true;
+
+    //Unpause the timer
+    mPaused = false;
+
+    //Get the current clock time
+    mStartTicks = SDL_GetTicks();
+	mPausedTicks = 0;
+}
+
+void LTimer::stop()
+{
+    //Stop the timer
+    mStarted = false;
+
+    //Unpause the timer
+    mPaused = false;
+
+	//Clear tick variables
+	mStartTicks = 0;
+	mPausedTicks = 0;
+}
+
+void LTimer::pause()
+{
+    //If the timer is running and isn't already paused
+    if( mStarted && !mPaused )
+    {
+        //Pause the timer
+        mPaused = true;
+
+        //Calculate the paused ticks
+        mPausedTicks = SDL_GetTicks() - mStartTicks;
+		mStartTicks = 0;
+    }
+}
+
+void LTimer::unpause()
+{
+    //If the timer is running and paused
+    if( mStarted && mPaused )
+    {
+        //Unpause the timer
+        mPaused = false;
+
+        //Reset the starting ticks
+        mStartTicks = SDL_GetTicks() - mPausedTicks;
+
+        //Reset the paused ticks
+        mPausedTicks = 0;
+    }
+}
+
+Uint32 LTimer::getTicks()
+{
+	//The actual timer time
+	Uint32 time = 0;
+
+    //If the timer is running
+    if( mStarted )
+    {
+        //If the timer is paused
+        if( mPaused )
+        {
+            //Return the number of ticks when the timer was paused
+            time = mPausedTicks;
+        }
+        else
+        {
+            //Return the current time minus the start time
+            time = SDL_GetTicks() - mStartTicks;
+        }
+    }
+
+    return time;
+}
+
+bool LTimer::isStarted()
+{
+	//Timer is running and paused or unpaused
+    return mStarted;
+}
+
+bool LTimer::isPaused()
+{
+	//Timer is running and paused
+    return mPaused && mStarted;
+}
+
+//.....................................................................................
+
 vector<int> getPos()
 {
 	
@@ -371,7 +280,7 @@ vector<int> getPos()
 	int y = rand();
 	y = rand() % GRID_HEIGHT;
 	
-	cout << "Fun1" << "\t" << x << "\t\t" << y << endl;
+	//cout << "Fun1" << "\t" << x << "\t\t" << y << endl;
 	
 	while((grid[XYToIndex(x, y)].info == '#') || (grid[XYToIndex(x, y)].info == '.'))
 	{
@@ -381,18 +290,18 @@ vector<int> getPos()
 		y = rand();
 		y = rand() % GRID_HEIGHT;	
 		
-		cout << "Fun2" << "\t" << x << "\t\t" << y << endl;	
+	//	cout << "Fun2" << "\t" << x << "\t\t" << y << endl;	
 			
 	}
 	
 	grid[XYToIndex(x, y)].info == '.';
 	
-	cout << "Fun3" << "\t" << x << "\t\t" << y << endl;
+	//cout << "Fun3" << "\t" << x << "\t\t" << y << endl;
 	
 	a.push_back(grid[XYToIndex(x, y)].box.x);
 	a.push_back(grid[XYToIndex(x, y)].box.y);
 	
-	cout << "Fun4" << "\t" << a[0] << "\t\t" << a[1] << endl;
+//	cout << "Fun4" << "\t" << a[0] << "\t\t" << a[1] << endl;
 	
 	return a;
 
