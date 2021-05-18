@@ -1,6 +1,3 @@
-/*This source code copyrighted by Lazy Foo' Productions (2004-2020)
-and may not be redistributed without written permission.*/
-
 //Using SDL, SDL_image, standard IO, math, and strings
 #include "game.cpp"
 
@@ -115,21 +112,69 @@ bool loadMedia()
 	}
 
 	//Load press texture
-	if( !gDotTexture.loadFromFile( "dot.bmp" ) )
+	if( !gThanosTexture.loadFromFile( "thanos.bmp" ) )
 	{
-		printf( "Failed to load dot texture!\n" );
+		printf( "Failed to load thanos texture!\n" );
 		success = false;
 	}
 	
-	for(int i = 0; i < 6; i++)
+	if( !gStoneTexture[POWER_STONE].loadFromFile( "power_stone.bmp" ) )
 	{
-		
-		if( !gStoneTexture[i].loadFromFile( "stone.bmp" ) )
-		{
 			
-			printf( "Failed to load stone %d texture!\n", i);
-			success = false;
+		printf( "Failed to load stone %d texture!\n", POWER_STONE);
+		success = false;
 		
+	}
+	
+	if( !gStoneTexture[MIND_STONE].loadFromFile( "mind_stone.bmp" ) )
+	{
+			
+		printf( "Failed to load stone %d texture!\n", MIND_STONE);
+		success = false;
+		
+	}
+	
+	if( !gStoneTexture[REALITY_STONE].loadFromFile( "reality_stone.bmp" ) )
+	{
+			
+		printf( "Failed to load stone %d texture!\n", REALITY_STONE);
+		success = false;
+		
+	}
+	
+	if( !gStoneTexture[TIME_STONE].loadFromFile( "time_stone.bmp" ) )
+	{
+			
+		printf( "Failed to load stone %d texture!\n", TIME_STONE);
+		success = false;
+		
+	}
+	
+	if( !gStoneTexture[SPACE_STONE].loadFromFile( "space_stone.bmp" ) )
+	{
+			
+		printf( "Failed to load stone %d texture!\n", SPACE_STONE);
+		success = false;
+		
+	}
+	
+	if( !gStoneTexture[SOUL_STONE].loadFromFile( "soul_stone.bmp" ) )
+	{
+			
+		printf( "Failed to load stone %d texture!\n", SOUL_STONE);
+		success = false;
+		
+	}
+	
+	for(int i = 0; i < 2; i++)
+	{
+	
+		if( !gAvengersTexture[i].loadFromFile( "dot.bmp" ) )
+		{
+				
+			printf( "Failed to load avenger %d texture!\n", i);
+			success = false;
+			
 		}
 	
 	}
@@ -141,10 +186,21 @@ void close()
 {
 	
 	//Free loaded images
-	gDotTexture.free();
+	gThanosTexture.free();
 	gTimeTextTexture.free();
 	gStartPromptTexture.free();
+	gStoneCountTextTexture.free();
+	gStoneTypeTexture.free();
 	gPausePromptTexture.free();
+	gWinPromptTexture.free();
+	gLosePromptTexture.free();
+	
+	for(int i = 0; i < 2; i++)
+	{
+		
+		gAvengersTexture[i].free();
+	
+	}
 	
 	for(int i = 0; i < 6; i++)
 	{
@@ -269,13 +325,41 @@ int main( int argc, char* args[] )
 			//In memory text stream
 			std::stringstream timeText;
 			
-			//The dot that will be moving around on the screen
-			Dot dot;
+			//The thanos that will be moving around on the screen
+			Dot thanos, avengers[2];
+			thanos.type = THANOS;
+			thanos.strength = 120;
+			avengers[0].strength = 60;
+			avengers[1].strength = 70;
+			
+			for(int i = 0; i < 2; i++)
+			{
+			
+				avengers[i].assignPos();
+				
+				avengers[i].type = AVENGER;
+			
+			}
+			
 			Stone stone[6];
+			
+			stone[POWER_STONE].type = POWER_STONE;
+			stone[MIND_STONE].type = MIND_STONE;
+			stone[SPACE_STONE].type = SPACE_STONE;
+			stone[TIME_STONE].type = TIME_STONE;
+			stone[REALITY_STONE].type = REALITY_STONE;
+			stone[SOUL_STONE].type = SOUL_STONE;
+			
+			bool status = true;
+			
+			vector<int> stone_type;
+			
+			int control = 0;
 			
 			//While application is running
 			while( !quit )
 			{
+				
 				//Handle events on queue
 				while( SDL_PollEvent( &e ) != 0 )
 				{
@@ -284,59 +368,227 @@ int main( int argc, char* args[] )
 					{
 						quit = true;
 					}
-					//Reset start time on return keypress
-					else if( e.type == SDL_KEYDOWN )
+					
+					else if(status)
 					{
-						//Start/stop
-						if( e.key.keysym.sym == SDLK_s )
+					
+						//Reset start time on return keypress
+						if( e.type == SDL_KEYDOWN )
 						{
-							if( timer.isStarted() )
+							//Start/stop
+							if( (e.key.keysym.sym == SDLK_UP) || (e.key.keysym.sym == SDLK_DOWN) || (e.key.keysym.sym == SDLK_LEFT) || (e.key.keysym.sym == SDLK_RIGHT) )
 							{
-								timer.stop();
+								if( !timer.isStarted() )
+								{
+									timer.start();
+								}
+									
 							}
-							else
-							{
-								timer.start();
-							}
+							
 						}
-						//Pause/unpause
-						else if( e.key.keysym.sym == SDLK_p )
+							
+						switch(control)
 						{
-							if( timer.isPaused() )
-							{
-								timer.unpause();
-							}
-							else
-							{
-								timer.pause();
-							}
+						
+							case 0:
+								thanos.handleEvent( e );
+								break;
+							
+							case 1:
+								avengers[0].handleEvent(e);
+								break;
+							
+							case 2:
+								avengers[1].handleEvent(e);
+								break;
+						
 						}
+					
 					}
-					
-					//Handle input for the dot
-					dot.handleEvent( e );
-					
+						
 				}
+				
 
-				//Move the dot and check collision
-				dot.move();
+				//Move the thanos and avengers and check collision
+				thanos.move(&avengers[0], &avengers[1]);
+				
+				for(int i = 0; i < 2; i++)
+				{
+				
+					avengers[i].move(&thanos);
+				
+				}
 				
 				for(int i = 0; i < 6; i++)
 				{
 				
-					if(stone[i].check(dot))
-						dot.num_stones++;
+					if(stone[i].check(thanos))
+					{
+					
+						thanos.num_stones++;
+						stone_type.push_back(stone[i].type);	
+						
+					}
+				
+				}
+				
+				if( e.type == SDL_KEYDOWN )
+				{
+					
+					if( e.key.keysym.sym == SDLK_TAB )
+					{
+						control = (control + 1) % 3;
+									
+					}
+								
+				}
+				
+			/*	switch(control)
+				{
+				
+					case 0:
+						
+						for(int i = 0; i < 2; i++)
+						{
+						
+							if(thanos.check(avengers[i]))
+							{
+								cout << "1...........\n";
+								recomputeStrength(&thanos, &avengers[i]);
+//								thanos.pPressedInactive = true;
+							
+							}
+							
+						}
+						
+						break;
+						
+					case 1:
+						
+						if(avengers[0].check(thanos))
+						{
+							cout << "2...........\n";
+							recomputeStrength(&avengers[0], &thanos);
+							
+						}
+						
+						break;
+					
+					case 2:
+						
+						if(avengers[1].check(thanos))
+						{
+							cout << "3...........\n";
+							recomputeStrength(&avengers[1], &thanos);
+							
+						}
+						
+						break;
+				
+				}*/
+				
+				
+				cout << "Thanos\t" << thanos.strength << "\t" << thanos.power_factor << endl;
+				cout << "Avenger1\t" << avengers[0].strength << "\t" << avengers[0].power_factor << endl;
+				cout << "Avenger2\t" << avengers[1].strength << "\t" << avengers[1].power_factor << endl;
+				
+				//Set text to be rendered
+				timeText.str( "" );
+				
+				for (int i = 0; i < stone_type.size(); i++)
+				{
+				 
+       				switch (stone_type[i])
+       				{
+       				
+       					case POWER_STONE:
+       						timeText << "PS ";
+       						break; 
+       					
+       					case TIME_STONE:
+       						timeText << "TS ";
+       						break; 
+       					
+       					case MIND_STONE:
+       						timeText << "MS ";
+       						break; 
+       						
+       					case SPACE_STONE:
+       						timeText << "SpS ";
+       						break; 
+       					
+       					case REALITY_STONE:
+       						timeText << "RS ";
+       						break; 
+       					
+       					case SOUL_STONE:
+       						timeText << "SoS ";
+       						break; 
+       				
+       				}	
+				
+				}
+				
+				//Render text
+				if( !gStoneTypeTexture.loadFromRenderedText( timeText.str().c_str(), textColor ) )
+				{
+					//printf( "Unable to render stone type texture!\n" );
+				}
+				
+				float time_current =  timer.getTicks() / 1000.f;
+				
+				if((time_current > 100) && (thanos.num_stones < 6))
+				{
+				
+					//Set text to be rendered
+					timeText.str( "" );
+					timeText << "Lose!" ; 
+					timer.stop();
+					status = false;
+
+					//Render text
+					if( !gLosePromptTexture.loadFromRenderedText( timeText.str().c_str(), textColor ) )
+					{
+						printf( "Unable to render lose texture!\n" );
+					}
 				
 				}
 				
 				//Set text to be rendered
 				timeText.str( "" );
-				timeText << "Seconds since start time " << ( timer.getTicks() / 1000.f ) ; 
+				timeText << "Time: " << (time_current) ; 
 
 				//Render text
 				if( !gTimeTextTexture.loadFromRenderedText( timeText.str().c_str(), textColor ) )
 				{
 					printf( "Unable to render time texture!\n" );
+				}
+				
+				//Set text to be rendered
+				timeText.str( "" );
+				timeText << "Stones: " << ( thanos.num_stones ) ; 
+
+				//Render text
+				if( !gStoneCountTextTexture.loadFromRenderedText( timeText.str().c_str(), textColor ) )
+				{
+					printf( "Unable to render stone count texture!\n" );
+				}
+				
+				if((thanos.num_stones == 6) && (time_current <= 100))
+				{
+				
+					//Set text to be rendered
+					timeText.str( "" );
+					timeText << "Win!" ; 
+					timer.stop();
+					status = false;
+
+					//Render text
+					if( !gWinPromptTexture.loadFromRenderedText( timeText.str().c_str(), textColor ) )
+					{
+						printf( "Unable to render win texture!\n" );
+					}
+				
 				}
 
 				//Clear screen
@@ -349,17 +601,29 @@ int main( int argc, char* args[] )
 				{
 				
 					stone[i].render(i);
-					cout << "1. " << dot.num_stones << " stones picked!" << endl;
+					//cout << "1. " << thanos.num_stones << " stones picked!" << endl;
 				
 				}
 				
-				//Render dot
-				dot.render();
+				//Render thanos
+				thanos.render(&gThanosTexture);
+				
+				//Render avengers
+				for(int i = 0; i < 2; i++)
+				{
+				
+					avengers[i].render(&gAvengersTexture[i]);
+				
+				}
 				
 				//Render textures
 				gStartPromptTexture.render( ( SCREEN_WIDTH - gStartPromptTexture.getWidth() ) / 2, 0 );
 				gPausePromptTexture.render( ( SCREEN_WIDTH - gPausePromptTexture.getWidth() ) / 2, gStartPromptTexture.getHeight() );
-				gTimeTextTexture.render( ( SCREEN_WIDTH - gTimeTextTexture.getWidth() ) / 2, ( SCREEN_HEIGHT - gTimeTextTexture.getHeight() ) / 2 );
+				gTimeTextTexture.render( ( SCREEN_WIDTH - gTimeTextTexture.getWidth() ) - 50, ( SCREEN_HEIGHT - gTimeTextTexture.getHeight() ) / 8 );
+				gStoneCountTextTexture.render( ( SCREEN_WIDTH - gTimeTextTexture.getWidth() ) / 10, ( SCREEN_HEIGHT - gTimeTextTexture.getHeight() ) / 8 );
+				gWinPromptTexture.render( ( SCREEN_WIDTH - gTimeTextTexture.getWidth() ) / 2, ( SCREEN_HEIGHT - gTimeTextTexture.getHeight() ) / 8 );
+				gLosePromptTexture.render( ( SCREEN_WIDTH - gTimeTextTexture.getWidth() ) / 2, ( SCREEN_HEIGHT - gTimeTextTexture.getHeight() ) / 8 );
+				gStoneTypeTexture.render( ( SCREEN_WIDTH - gTimeTextTexture.getWidth() ) / 10, ( SCREEN_HEIGHT - gTimeTextTexture.getHeight() ) / 15 );
 
 				//Update screen
 				SDL_RenderPresent( gRenderer );
@@ -372,3 +636,4 @@ int main( int argc, char* args[] )
 
 	return 0;
 }
+
