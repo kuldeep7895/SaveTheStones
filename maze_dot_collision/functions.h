@@ -12,17 +12,29 @@
 
 using namespace std;
 
-//----CONSTANTS-------------------------------------------------------
+//----CONSTANTS--------------------
+//-----------------------------------
 
-#define GRID_WIDTH 35
-#define GRID_HEIGHT 35
+#define GRID_WIDTH 33
+#define GRID_HEIGHT 33
 #define NORTH 0
 #define EAST 1
 #define SOUTH 2
 #define WEST 3
+#define THANOS 0
+#define AVENGER 1
 
-const int SCREEN_WIDTH = 800;
-const int SCREEN_HEIGHT = 800;
+const int SCREEN_WIDTH = 850;
+const int SCREEN_HEIGHT = 850;
+
+enum stone {
+    POWER_STONE,
+    MIND_STONE,
+    SOUL_STONE,
+    TIME_STONE,
+    SPACE_STONE,
+    REALITY_STONE
+};
 
 // Structure of the maze
 
@@ -44,3 +56,4 @@ int XYToIndex( int x, int y );
 int IsInBounds( int x, int y );
 void Visit( int x, int y );
 void createMaze();
+
