@@ -52,6 +52,8 @@ class LTimer
     public:
 		//Initializes variables
 		LTimer();
+		
+		int init_time = 50;
 
 		//The various clock actions
 		void start();
@@ -64,6 +66,7 @@ class LTimer
 
 		//Checks the status of the timer
 		bool isStarted();
+		bool check();
 		bool isPaused();
 
     private:
@@ -80,15 +83,23 @@ class LTimer
 
 
 //Scene textures
-LTexture gDotTexture;
+LTexture gThanosTexture;
+LTexture gAvengersTexture[2];
+
 LTexture gStoneTexture[6];
 
 //Scene textures
 LTexture gTimeTextTexture;
+LTexture gStoneCountTextTexture;
+LTexture gStoneTypeTexture;
 LTexture gPausePromptTexture;
 LTexture gStartPromptTexture;
+LTexture gWinPromptTexture;
+LTexture gLosePromptTexture;
+
 
 vector<int> getPos();
+bool checkCollision( SDL_Rect a );
 
 //The dot that will move around on the screen
 class Dot
@@ -100,30 +111,344 @@ class Dot
 
 		//Maximum axis velocity of the dot
 		static const int DOT_VEL = 2;
-
-		//Initializes the variables
-		Dot();
-
-		//Takes key presses and adjusts the dot's velocity
-		void handleEvent( SDL_Event& e );
-
-		//Moves the dot and checks collision
-		void move();
-
-		//Shows the dot on the screen
-		void render();
-		
-		int num_stones;
 		
 		//Dot's collision box
 		SDL_Rect mCollider;
 
-    private:
+    
 		//The X and Y offsets of the dot
 		int mPosX, mPosY;
 
 		//The velocity of the dot
 		int mVelX, mVelY;
+		
+		int num_stones;
+		
+		float strength;
+		
+		int power_factor;
+		
+		int type;
+		
+		//int factor = 1;
+		
+		bool pPressed;
+		
+		bool pPressedInactive;
+
+		//Initializes the variables
+		Dot()
+		{
+		
+			//Initialize the offsets
+		    mPosX = 0;
+		    mPosY = 0;
+		    
+		    //strength = 100;
+		    
+		    power_factor = 1;		//1.2    0.6
+		    //factor = 1;
+		    
+		    pPressed = false;
+		    pPressedInactive = false;
+
+			//Set collision box dimension
+			mCollider.w = DOT_WIDTH;
+			mCollider.h = DOT_HEIGHT;
+
+		    //Initialize the velocity
+		    mVelX = 0;
+		    mVelY = 0;
+		    
+		    num_stones = 0;
+		
+		}
+
+		//Takes key presses and adjusts the dot's velocity
+		void handleEvent( SDL_Event& e )
+		{
+    
+		    //If a key was pressed
+		    if( e.type == SDL_KEYDOWN && e.key.repeat == 0 )
+		    {
+
+			//Adjust the velocity
+			switch( e.key.keysym.sym )
+			{
+			    case SDLK_UP: mVelY -= DOT_VEL; break;
+			    case SDLK_DOWN: mVelY += DOT_VEL; break;
+			    case SDLK_LEFT: mVelX -= DOT_VEL; break;
+			    case SDLK_RIGHT: mVelX += DOT_VEL; break;
+			    case SDLK_p: pPressed = true; cout << "P pressed!......................................................................\n";break;
+			}
+		    }
+		    //If a key was released
+		    else if( e.type == SDL_KEYUP && e.key.repeat == 0 )
+		    {
+			//Adjust the velocity
+			switch( e.key.keysym.sym )
+			{
+			    case SDLK_UP: mVelY += DOT_VEL; break;
+			    case SDLK_DOWN: mVelY -= DOT_VEL; break;
+			    case SDLK_LEFT: mVelX += DOT_VEL; break;
+			    case SDLK_RIGHT: mVelX -= DOT_VEL; break;
+			    case SDLK_p: pPressed = false; cout << "P released!......................................................................\n";break;
+			}
+		    }
+		
+		}
+		
+		void recomputeStrength(Dot* d)
+		{
+		
+			float temp = power_factor;
+	
+			if(pPressed)
+				temp = power_factor + 1;
+			
+			float diff = temp - (*d).power_factor;
+			
+			if(diff > 0)
+			{
+								
+				(*d).strength = (*d).strength - diff * 10;
+										
+			}
+			
+			else if(diff < 0)
+			{
+			
+				strength = strength + diff * 10;
+			
+			}
+		
+		}
+
+		//Moves the dot and checks collision
+		void move()
+		{
+		
+			//Move the dot left or right
+		    mPosX += mVelX;
+		    mCollider.x = mPosX;
+
+		    //If the dot collided or went too far to the left or right
+		    if( ( mPosX < 0 ) || ( mPosX + DOT_WIDTH > SCREEN_WIDTH ) || checkCollision(mCollider) )
+		    {
+			//Move back
+			mPosX -= mVelX;
+			mCollider.x = mPosX;
+		    }
+
+		    //Move the dot up or down
+		    mPosY += mVelY;
+		    mCollider.y = mPosY;
+
+		    //If the dot collided or went too far up or down
+		    if( ( mPosY < 0 ) || ( mPosY + DOT_HEIGHT > SCREEN_HEIGHT ) || checkCollision( mCollider) )
+		    {
+			//Move back
+			mPosY -= mVelY;
+			mCollider.y = mPosY;
+		    }
+		
+		}
+		
+		//Moves the dot and checks collision
+		void move(Dot* d)
+		{
+		
+			//Move the dot left or right
+		    mPosX += mVelX;
+		    mCollider.x = mPosX;
+		    
+		    int collision;
+
+		    //If the dot collided or went too far to the left or right
+		    if( ( mPosX < 0 ) || ( mPosX + DOT_WIDTH > SCREEN_WIDTH ) || checkCollision(mCollider) || (collision = check(*d)))
+		    {
+			//Move back
+			mPosX -= mVelX;
+			mCollider.x = mPosX;
+			
+			if(collision)
+			{
+			
+				recomputeStrength(d);
+			
+			}
+		    }
+
+		    //Move the dot up or down
+		    mPosY += mVelY;
+		    mCollider.y = mPosY;
+
+		    //If the dot collided or went too far up or down
+		    if( ( mPosY < 0 ) || ( mPosY + DOT_HEIGHT > SCREEN_HEIGHT ) || checkCollision( mCollider) || (collision = check(*d)))
+		    {
+			//Move back
+			mPosY -= mVelY;
+			mCollider.y = mPosY;
+			
+			if(collision)
+			{
+			
+				recomputeStrength(d);
+			
+			}
+		    }
+		
+		}
+		
+		//Moves the dot and checks collision
+		void move(Dot* d1, Dot* d2)
+		{
+		
+			//Move the dot left or right
+		    mPosX += mVelX;
+		    mCollider.x = mPosX;
+		    
+		    int collision1;
+		    int collision2;
+
+		    //If the dot collided or went too far to the left or right
+		    if( ( mPosX < 0 ) || ( mPosX + DOT_WIDTH > SCREEN_WIDTH ) || checkCollision(mCollider) || (collision1 = check(*d1)) || (collision2 = check(*d2)))
+		    {
+			//Move back
+			mPosX -= mVelX;
+			mCollider.x = mPosX;
+			
+			if(collision1)
+			{
+			
+				recomputeStrength(d1);
+			
+			}
+			
+			if(collision2)
+			{
+			
+				recomputeStrength(d2);
+			
+			}
+		    }
+
+		    //Move the dot up or down
+		    mPosY += mVelY;
+		    mCollider.y = mPosY;
+
+		    //If the dot collided or went too far up or down
+		    if( ( mPosY < 0 ) || ( mPosY + DOT_HEIGHT > SCREEN_HEIGHT ) || checkCollision( mCollider) || (collision1 = check(*d1)) || (collision2 = check(*d2)))
+		    {
+			//Move back
+			mPosY -= mVelY;
+			mCollider.y = mPosY;
+			
+			if(collision1)
+			{
+			
+				recomputeStrength(d1);
+			
+			}
+			
+			if(collision2)
+			{
+			
+				recomputeStrength(d2);
+			
+			}
+		    }
+		
+		}
+
+		//Shows the dot on the screen
+		void render(LTexture* lText)
+		{
+		
+			//Show the dot
+			(*lText).render( mPosX, mPosY );
+		
+		}
+		
+		
+		
+		void assignPos()
+		{
+		
+			vector<int> pos = getPos();
+    
+		    //grid[XYToIndex(pos[0], pos[1])].info = 'A';
+		    
+		    mPosX = pos[0];
+		    mPosY = pos[1];
+		
+		}
+		
+		void power(int i)
+		{
+		
+			power_factor += 0.5 * i ;
+		
+		}
+		
+		//Moves the dot and checks collision
+		bool check(Dot d)
+		{
+
+			//The sides of the rectangles
+				int leftA, leftB;
+				int rightA, rightB;
+				int topA, topB;
+				int bottomA, bottomB;
+
+				//Calculate the sides of rect A
+				leftA = d.mCollider.x;
+				rightA = d.mCollider.x + d.mCollider.w;
+				topA = d.mCollider.y;
+				bottomA = d.mCollider.y + d.mCollider.h;
+
+				//Calculate the sides of rect B
+				leftB = mCollider.x;
+				rightB = mCollider.x + mCollider.w;
+				topB = mCollider.y;
+				bottomB = mCollider.y + mCollider.h;
+							
+				//If any of the sides from A are outside of B
+				if( bottomA <= topB )
+				{
+							
+					return false;
+					
+				}
+
+				if( topA >= bottomB )
+				{
+				
+					return false;
+						
+				}
+
+				if( rightA <= leftB )
+				{
+							
+					return false;
+							
+				}
+
+				if( leftA >= rightB )
+				{
+							
+					return false;
+							
+				}
+
+				//If none of the sides from A are outside B
+				//pick = true;
+				return true;
+			
+			
+
+		}
 		
 };
 
@@ -135,6 +460,8 @@ class Stone
 		static const int DOT_HEIGHT = 20;
 
 		bool pick;
+		
+		int type;
 
 		//Initializes the variables
 		Stone()
@@ -142,7 +469,7 @@ class Stone
 	
 			vector<int> pos = getPos();
 			
-			cout << "Constructor" << "\t" << pos[0] << "\t" << pos[1] << endl;
+			//cout << "Constructor" << "\t" << pos[0] << "\t" << pos[1] << endl;
 			
 			//Initialize the offsets
 		    	mPosX = pos[0];
