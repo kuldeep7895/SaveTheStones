@@ -133,8 +133,8 @@ void createMaze()
 		 		grid[XYToIndex(x,y)].info = ' ';
 		 	//cout << grid[XYToIndex(x,y)];
 		 	
-		 	grid[XYToIndex(x,y)].box.x = 40 + (SCREEN_WIDTH / 40)*x;
-			grid[XYToIndex(x,y)].box.y = 40 + (SCREEN_WIDTH / 40)*y;
+		 	grid[XYToIndex(x,y)].box.x = 70 + (SCREEN_WIDTH / 40)*x;
+			grid[XYToIndex(x,y)].box.y = 130 + (SCREEN_WIDTH / 40)*y;
 			grid[XYToIndex(x,y)].box.w = SCREEN_WIDTH / 40;
 			grid[XYToIndex(x,y)].box.h = SCREEN_WIDTH / 40;
 		 	
