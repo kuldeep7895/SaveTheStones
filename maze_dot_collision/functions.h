@@ -3,12 +3,14 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_ttf.h>
+#include <SDL2/SDL_mixer.h>
 #include <stdio.h>
 #include <string>
 #include <cmath>
 #include <time.h>
 #include <vector>
 #include <sstream>
+#include <ctime>
 
 using namespace std;
 
@@ -56,4 +58,3 @@ int XYToIndex( int x, int y );
 int IsInBounds( int x, int y );
 void Visit( int x, int y );
 void createMaze();
-

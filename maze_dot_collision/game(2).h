@@ -106,8 +106,6 @@ LTexture gLosePromptTexture;
 vector<int> getPos();
 bool checkCollision( SDL_Rect a );
 
-float xtraTime = 0;
-
 bool mPressed = false;
 bool soulPressed = false;
 bool rPressed = false;
@@ -240,7 +238,7 @@ class Dot
 			
 			//float diff = temp - (*d).power_factor;
 			
-			if(!mPressed&&!soulPressed)					
+			if(!mPressed)					
 			{
 			
 				(*d).strength = (*d).strength - temp;
@@ -248,26 +246,13 @@ class Dot
 				
 			}
 			
-			else if(pPressed&&mPressed)
+			else if(pPressed)
 			{	
 			
 				
 				cout << "Else\t" << mPressed << endl;
 				mPressed = false;
 			
-			}
-			
-			if(soulPressed&&pPressed){
-				
-				if(type == THANOS)
-					xtraTime -= 20;		
-					
-				(*d).kill = true;
-				(*d).strength = 0;
-				soulPressed = false;
-			}else if(!mPressed&&pPressed){
-				(*d).strength = (*d).strength - temp;
-				
 			}
 			
 			
@@ -790,7 +775,7 @@ class Thanos : public Dot
 
 	public:
 
-		
+		float xtraTime = 0;
 		float time;
 		
 		bool tPressed = false;
@@ -977,7 +962,7 @@ class Thanos : public Dot
 				break;
 				
 			    case SDLK_g:
-			    	cout << "G pressed!......................................................................\n";
+			    	cout << "M pressed!......................................................................\n";
 			    	
 			    	if((!stones_used[SOUL_STONE]) && contains(stones, SOUL_STONE) && (control == 0))
 				{

@@ -254,6 +254,13 @@ Uint32 LTimer::getTicks()
     return time;
 }
 
+void LTimer::decrease()
+{
+	
+	mStartTicks += 5000;	
+	
+}
+
 bool LTimer::isStarted()
 {
 	//Timer is running and paused or unpaused
@@ -311,6 +318,51 @@ vector<int> getPos()
 //	cout << "Fun4" << "\t" << a[0] << "\t\t" << a[1] << endl;
 	
 	return a;
+
+}
+
+void whiteSquares()
+{
+	
+	//srand(time(0));
+	
+	//vector<int> a;
+	for(int i = 0; i < 20; i++)
+	{	
+		
+		int x = rand();
+		x = rand() % GRID_WIDTH;
+		int y = rand();
+		y = rand() % GRID_HEIGHT;
+		
+		//cout << "Fun1" << "\t" << x << "\t\t" << y << endl;
+		
+		while((grid[XYToIndex(x, y)].info == ' ') || (grid[XYToIndex(x, y)].info == '.') || (x == 0) || (x == GRID_WIDTH - 1) || (y == 0) || (y == GRID_WIDTH - 1))
+		{
+				
+			x = rand();
+			x = rand() % GRID_WIDTH;
+			y = rand();
+			y = rand() % GRID_HEIGHT;	
+			
+		//	cout << "Fun2" << "\t" << x << "\t\t" << y << endl;	
+				
+		}
+		
+		grid[XYToIndex(x, y)].info = ' ';
+		
+		//cout << "Fun3" << "\t" << x << "\t\t" << y << endl;
+		
+		grid[XYToIndex(x,y)].box.x = 70 + (SCREEN_WIDTH / 40)*x;
+		grid[XYToIndex(x,y)].box.y = 130 + (SCREEN_WIDTH / 40)*y;
+		grid[XYToIndex(x,y)].box.w = SCREEN_WIDTH / 40;
+		grid[XYToIndex(x,y)].box.h = SCREEN_WIDTH / 40;
+	
+	}
+		
+//	cout << "Fun4" << "\t" << a[0] << "\t\t" << a[1] << endl;
+	
+	//return a;
 
 }
 

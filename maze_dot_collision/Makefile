@@ -4,7 +4,7 @@ CFLAGS=-c -Wall
 
 OBJS=maze_render.o maze_generate.o functions.h game.h
 
-PKG=-w -lSDL2 -lSDL2_image -lSDL2_ttf
+PKG=-w -lSDL2 -lSDL2_image -lSDL2_ttf -lSDL2_mixer
 
 all: maze
 

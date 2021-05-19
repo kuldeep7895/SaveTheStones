@@ -1,3 +1,4 @@
+
 //Using SDL, SDL_image, standard IO, math, and strings
 #include "game.cpp"
 
@@ -194,13 +195,13 @@ void close()
 	gPausePromptTexture.free();
 	gWinPromptTexture.free();
 	gLosePromptTexture.free();
-	
-	for(int i = 0; i < 2; i++)
+	gStrengthTexture.free();
+/*	for(int i = 0; i < 2; i++)
 	{
 		
 		gAvengersTexture[i].free();
 	
-	}
+	}*/
 	
 	for(int i = 0; i < 6; i++)
 	{
@@ -295,6 +296,7 @@ int main( int argc, char* args[] )
 	ResetGrid();
 	Visit(1,1);
 	createMaze();
+	whiteSquares();
 	
 	//Start up SDL and create window
 	if( !init() )
@@ -326,9 +328,11 @@ int main( int argc, char* args[] )
 			std::stringstream timeText;
 			
 			//The thanos that will be moving around on the screen
-			Dot thanos, avengers[2];
+			Thanos thanos;
+			Dot avengers[2];
 			thanos.type = THANOS;
 			thanos.strength = 120;
+			
 			avengers[0].strength = 60;
 			avengers[1].strength = 70;
 			
@@ -355,6 +359,10 @@ int main( int argc, char* args[] )
 			vector<int> stone_type;
 			
 			int control = 0;
+			
+			//bool realityActivated = false;
+			
+			float time_cur;
 			
 			//While application is running
 			while( !quit )
@@ -408,14 +416,49 @@ int main( int argc, char* args[] )
 						
 				}
 				
+				float time_current =  timer.getTicks() / 1000.f;
+				
+				thanos.time = time_current - xtraTime;
+				
 
 				//Move the thanos and avengers and check collision
-				thanos.move(&avengers[0], &avengers[1]);
+				thanos.move(&(avengers[0]), &(avengers[1]));
 				
-				for(int i = 0; i < 2; i++)
+				if(!realityActivated)
+				{
+
+					for(int i = 0; i < 2; i++)
+					{
+					
+						avengers[i].move(&thanos);
+					
+					}
+					
+				}
+				
+				else
 				{
 				
-					avengers[i].move(&thanos);
+					if(rPressed)
+					{
+					
+						time_cur = time_current;
+						rPressed = false;
+						realityActivated = true;
+					
+					}
+					
+					else
+					{
+					
+						if(time_current - time_cur > 5)
+						{
+						
+							realityActivated = false;
+						
+						}
+					
+					}
 				
 				}
 				
@@ -432,16 +475,20 @@ int main( int argc, char* args[] )
 				
 				}
 				
+				thanos.stones = stone_type;
+				
 				if( e.type == SDL_KEYDOWN )
 				{
 					
-					if( e.key.keysym.sym == SDLK_TAB )
+					if( (e.key.keysym.sym == SDLK_TAB) && (e.key.repeat == 0) )
 					{
 						control = (control + 1) % 3;
 									
 					}
 								
 				}
+				
+				thanos.control = control;
 				
 			/*	switch(control)
 				{
@@ -487,13 +534,26 @@ int main( int argc, char* args[] )
 				
 				}*/
 				
+				//Set text to be rendered
+				timeText.str( "" );
+				timeText << "Strengths: Thanos - " << thanos.strength << ", Avenger 1 - " << avengers[0].strength << ", Avenger 2 - " << avengers[1].strength; 
+
+				//Render text
+				if( !gStrengthTexture.loadFromRenderedText( timeText.str().c_str(), textColor ) )
+				{
+					printf( "Unable to render strength texture!\n" );
+				}
 				
-				cout << "Thanos\t" << thanos.strength << "\t" << thanos.power_factor << endl;
-				cout << "Avenger1\t" << avengers[0].strength << "\t" << avengers[0].power_factor << endl;
-				cout << "Avenger2\t" << avengers[1].strength << "\t" << avengers[1].power_factor << endl;
+				
+				//cout << "Thanos\t" << thanos.strength << "\t" << thanos.power_factor << endl;
+				//cout << "Avenger1\t" << avengers[0].strength << "\t" << avengers[0].power_factor << endl;
+				//cout << "Avenger2\t" << avengers[1].strength << "\t" << avengers[1].power_factor << endl;
+				//cout << thanos.xPressed << endl;
+				//cout << soulPressed << endl;
 				
 				//Set text to be rendered
 				timeText.str( "" );
+				timeText << "Type: ";
 				
 				for (int i = 0; i < stone_type.size(); i++)
 				{
@@ -535,9 +595,7 @@ int main( int argc, char* args[] )
 					//printf( "Unable to render stone type texture!\n" );
 				}
 				
-				float time_current =  timer.getTicks() / 1000.f;
-				
-				if((time_current > 100) && (thanos.num_stones < 6))
+				if((thanos.time > 100) && (thanos.num_stones < 6))
 				{
 				
 					//Set text to be rendered
@@ -556,7 +614,7 @@ int main( int argc, char* args[] )
 				
 				//Set text to be rendered
 				timeText.str( "" );
-				timeText << "Time: " << (time_current) ; 
+				timeText << "Time: " << (thanos.time) ; 
 
 				//Render text
 				if( !gTimeTextTexture.loadFromRenderedText( timeText.str().c_str(), textColor ) )
@@ -574,7 +632,7 @@ int main( int argc, char* args[] )
 					printf( "Unable to render stone count texture!\n" );
 				}
 				
-				if((thanos.num_stones == 6) && (time_current <= 100))
+				if((thanos.num_stones == 6) && (thanos.time <= 100))
 				{
 				
 					//Set text to be rendered
@@ -617,8 +675,8 @@ int main( int argc, char* args[] )
 				}
 				
 				//Render textures
-				gStartPromptTexture.render( ( SCREEN_WIDTH - gStartPromptTexture.getWidth() ) / 2, 0 );
-				gPausePromptTexture.render( ( SCREEN_WIDTH - gPausePromptTexture.getWidth() ) / 2, gStartPromptTexture.getHeight() );
+				gStrengthTexture.render( ( SCREEN_WIDTH - gStartPromptTexture.getWidth() ) / 10, 0 );
+				
 				gTimeTextTexture.render( ( SCREEN_WIDTH - gTimeTextTexture.getWidth() ) - 50, ( SCREEN_HEIGHT - gTimeTextTexture.getHeight() ) / 8 );
 				gStoneCountTextTexture.render( ( SCREEN_WIDTH - gTimeTextTexture.getWidth() ) / 10, ( SCREEN_HEIGHT - gTimeTextTexture.getHeight() ) / 8 );
 				gWinPromptTexture.render( ( SCREEN_WIDTH - gTimeTextTexture.getWidth() ) / 2, ( SCREEN_HEIGHT - gTimeTextTexture.getHeight() ) / 8 );
@@ -636,4 +694,3 @@ int main( int argc, char* args[] )
 
 	return 0;
 }
-
