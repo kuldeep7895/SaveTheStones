@@ -1,0 +1,3 @@
+g++  chat_screen.cpp main.cpp -lncurses -ltinfo -lenet -lpthread  -fpermissive
+g++   main.cpp -lncurses -ltinfo -lenet -lpthread  -fpermissive
+
