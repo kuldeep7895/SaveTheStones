@@ -1,0 +1,3 @@
+g++   client.cpp -lncurses -ltinfo -lenet -lpthread  -fpermissive -o client 
+g++   server.cpp -lncurses -ltinfo -lenet -lpthread  -fpermissive -o server
+
