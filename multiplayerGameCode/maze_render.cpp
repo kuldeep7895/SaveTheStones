@@ -453,9 +453,10 @@ void stringToMaze(string s){
   		clock_t time_elapsed;
   		time_elapsed = clock()- globalClock;
   		
-  		cout<<"*****************************Time Taken is ---------------------"<<(float)time_elapsed/CLOCKS_PER_SEC<<endl;
   		
-  		if(((float)time_elapsed/CLOCKS_PER_SEC)>=10){
+  		
+  		if(((float)time_elapsed/CLOCKS_PER_SEC)>=0.01){
+  			cout<<"*****************************Time Taken is ---------------------"<<(float)time_elapsed/CLOCKS_PER_SEC<<endl;
   			cout<<"*****************************Slow connection ---------------------"<<endl;
   			
   				
@@ -1380,6 +1381,7 @@ int main( int argc, char* args[] )
 					msg+="*("+to_string(thanos.strength)+")"; 
 					
 					char message_data[800000] = "1|";
+					globalClock = clock();
 				  		strcat(message_data, msg.c_str());
 				  		SendPacket(peer, message_data);
 
