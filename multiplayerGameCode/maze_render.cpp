@@ -242,6 +242,7 @@ void close()
 	gWinPromptTexture.free();
 	gLosePromptTexture.free();
 	gStrengthTexture.free();
+
 /*	for(int i = 0; i < 2; i++)
 	{
 		
@@ -369,8 +370,8 @@ void stringToMaze(string s){
 
 
 
-	cout<<" String  we received is ------------------------------------------------------"<<endl;
-					cout<<s<<endl;
+//	cout<<" String  we received is ------------------------------------------------------"<<endl;
+	//				cout<<s<<endl;
 					
 					
 					
@@ -388,8 +389,8 @@ void stringToMaze(string s){
 		}
     }
     
-    cout<<"--------------------------------- My Data is --------------------"<<endl;
-    for (int y=0; y<GRID_HEIGHT; ++y)
+ //   cout<<"--------------------------------- My Data is --------------------"<<endl;
+    /*for (int y=0; y<GRID_HEIGHT; ++y)
 	{
 		 
 		for (int x=0; x<GRID_WIDTH; ++x)
@@ -400,7 +401,7 @@ void stringToMaze(string s){
 		
 		cout<<endl;
 			
-	}
+	}*/
 }
 
 /* sone extra funcs */
@@ -435,9 +436,10 @@ void stringToMaze(string s){
   
   string dataReceived = "";
   
+
   void ParseData(char* data)
   {
-  	cout<<"Raw data "<<data<<endl;
+  //	cout<<"Raw data "<<data<<endl;
   	// Will store the data type (e.g. 1, 2, etc)
   	int data_type;
 
@@ -453,8 +455,10 @@ void stringToMaze(string s){
   		
   		cout<<"*****************************Time Taken is ---------------------"<<(float)time_elapsed/CLOCKS_PER_SEC<<endl;
   		
-  		if(((float)time_elapsed/CLOCKS_PER_SEC)>=0.01){
+  		if(((float)time_elapsed/CLOCKS_PER_SEC)>=10){
   			cout<<"*****************************Slow connection ---------------------"<<endl;
+  			
+  				
   		}
   	}
 
@@ -468,7 +472,7 @@ void stringToMaze(string s){
   				char msg[8000000];
   				sscanf(data, "%*d|%*d|%[^|]", &msg);
   				//chatScreen.PostMessage(client_map[id]->GetUsername().c_str(), msg);
-  				cout<<client_map[id]->GetUsername().c_str()<<": "<<msg<<endl;
+  			//	cout<<client_map[id]->GetUsername().c_str()<<": "<<msg<<endl;
   				dataReceived = msg;
   			}
   			break;
@@ -573,7 +577,8 @@ int main( int argc, char* args[] )
 			
 			//The thanos that will be moving around on the screen
 			Thanos thanos;
-			
+			thanos.mPosX = grid[XYToIndex(1,0)].box.x;
+			thanos.mPosY = grid[XYToIndex(1,0)].box.y;
 			
 			
 			Dot avengers[numAveng];
@@ -1052,7 +1057,7 @@ int main( int argc, char* args[] )
 				  		globalClock = clock();
 				  		
 				  		int strIndex = 2;
-						cout<<dataReceived.length()<<endl;
+					//	cout<<dataReceived.length()<<endl;
 						string dataR = dataReceived;
 				  		int n = dataR.length();
 						
@@ -1126,10 +1131,10 @@ int main( int argc, char* args[] )
 						thanos.strength = stoi(num);
 					}
 					
-					cout<<"----------------------P Press -----------------------------"<<endl;
+				//	cout<<"----------------------P Press -----------------------------"<<endl;
 					for(int skip=0;skip<numAveng;skip++){
 						if(avengers[skip].pPressed){
-							cout<<"A WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW"<<skip<<"  "<<avengers[skip].pPressed<<endl;
+						//	cout<<"A WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW"<<skip<<"  "<<avengers[skip].pPressed<<endl;
 						}
 					
 					}
@@ -1142,9 +1147,9 @@ int main( int argc, char* args[] )
 					
 					string strMaze = "";
 					int strIndex = 0;
-					cout<<dataReceived.length()<<endl;
+				//	cout<<dataReceived.length()<<endl;
 					string dataR = dataReceived;
-					cout<<" Data we received is ------------------------------------------------------"<<dataR<<endl;
+				//	cout<<" Data we received is ------------------------------------------------------"<<dataR<<endl;
 					
 										
 					    int n = dataR.length();
@@ -1354,11 +1359,11 @@ int main( int argc, char* args[] )
 						
 						}
 					stone_type = localStones;
-					cout<<" ------------------------------New Print ----------------"<<endl;
+				//	cout<<" ------------------------------New Print ----------------"<<endl;
 					for(int myBad = 0 ;myBad<localStones.size();myBad++){
-						cout<<localStones[myBad]<<"    ";
+					//	cout<<localStones[myBad]<<"    ";
 					}
-					cout<<endl;
+				//	cout<<endl;
 										
 					stringToMaze(strMaze);
 					createMaze();

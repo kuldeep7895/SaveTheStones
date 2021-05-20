@@ -215,7 +215,7 @@ class Dot
 			    case SDLK_DOWN: mVelY += DOT_VEL; break;
 			    case SDLK_LEFT: mVelX -= DOT_VEL; break;
 			    case SDLK_RIGHT: mVelX += DOT_VEL; break;
-			    case SDLK_p: pPressed = true; cout << "P pressed!......................................................................\n";break;
+			    case SDLK_p: pPressed = true; break;
 			}
 		    }
 		    //If a key was released
@@ -228,7 +228,7 @@ class Dot
 			    case SDLK_DOWN: mVelY -= DOT_VEL; break;
 			    case SDLK_LEFT: mVelX += DOT_VEL; break;
 			    case SDLK_RIGHT: mVelX -= DOT_VEL; break;
-			    case SDLK_p: pPressed = false; cout << "P released!......................................................................\n";break;
+			    case SDLK_p: pPressed = false; break;
 			}
 		    }
 		
@@ -238,7 +238,7 @@ class Dot
 		{
 			float temp = 0;
 			
-			cout << "Type\t" << (*d).type << "\t" << type << endl;
+		//	cout << "Type\t" << (*d).type << "\t" << type << endl;
 	
 			if(pPressed)
 			{
@@ -257,7 +257,7 @@ class Dot
 			{
 			
 				(*d).strength = (*d).strength - temp;
-				cout << "If\t" << mPressed << endl;	
+			//	cout << "If\t" << mPressed << endl;	
 				
 			}
 			
@@ -265,7 +265,7 @@ class Dot
 			{	
 			
 				
-				cout << "Else\t" << mPressed << endl;
+			//	cout << "Else\t" << mPressed << endl;
 				mPressed = false;
 			
 			}
@@ -830,7 +830,7 @@ class Thanos : public Dot
 			if(pPressed)
 			{
 				
-				cout << "Special\t" << soulPressed << endl;
+			//	cout << "Special\t" << soulPressed << endl;
 				
 				if(!soulPressed)
 					(*d).strength = (*d).strength - 20;
@@ -887,7 +887,7 @@ class Thanos : public Dot
 			    case SDLK_DOWN: mVelY += DOT_VEL; break;
 			    case SDLK_LEFT: mVelX -= DOT_VEL; break;
 			    case SDLK_RIGHT: mVelX += DOT_VEL; break;
-			    case SDLK_p: pPressed = true; cout << "P pressed!......................................................................\n";break;
+			    case SDLK_p: pPressed = true; break;
 			    case SDLK_t:
 			    	
 			    	/*//if(!tPressedInactive)
@@ -920,7 +920,7 @@ class Thanos : public Dot
 				
 				}*/
 				
-				cout << (stones_used[TIME_STONE]) << "\t" << contains(stones, TIME_STONE) << "\t" << control << endl;
+			//	cout << (stones_used[TIME_STONE]) << "\t" << contains(stones, TIME_STONE) << "\t" << control << endl;
 				
 				if((!stones_used[TIME_STONE]) && contains(stones, TIME_STONE) && (control == 0))
 				{
@@ -938,7 +938,7 @@ class Thanos : public Dot
 			    case SDLK_x:
 			    	
 			    	
-			    	cout << "X pressed!......................................................................\n";
+			   // 	cout << "X pressed!......................................................................\n";
 			    	
 			    	if((!stones_used[POWER_STONE]) && contains(stones, POWER_STONE) && (control == 0))
 				{
@@ -956,7 +956,7 @@ class Thanos : public Dot
 			    
 			    case SDLK_r:
 			    
-			    	cout << "R pressed!......................................................................\n";
+			   // 	cout << "R pressed!......................................................................\n";
 			    	
 			    	if((!stones_used[REALITY_STONE]) && contains(stones, REALITY_STONE) && (control == 0))
 				{
@@ -972,14 +972,14 @@ class Thanos : public Dot
 			    	break;
 			    
 			    case SDLK_m:
-			    	cout << "M pressed!......................................................................\n";
+			    //	cout << "M pressed!......................................................................\n";
 			    	
 			    	if((!stones_used[MIND_STONE]) && contains(stones, MIND_STONE) && (control == 0))
 				{
 					mPressed = true; 
 				//	cout << "Initime" << time << endl;
 					//xpower_factor = 1;
-					cout << "M pressed\n";
+				//	cout << "M pressed\n";
 					//mazeCollision = false;
 					stones_used[MIND_STONE] = true;
 					
@@ -990,7 +990,7 @@ class Thanos : public Dot
 				break;
 				
 			    case SDLK_g:
-			    	cout << "G pressed!......................................................................\n";
+			    //	cout << "G pressed!......................................................................\n";
 			    	
 			    	if((!stones_used[SOUL_STONE]) && contains(stones, SOUL_STONE) && (control == 0))
 				{
@@ -1008,7 +1008,7 @@ class Thanos : public Dot
 				break;
 				
 			    case SDLK_k:
-			    	cout << "Sp pressed!......................................................................\n";
+			    //	cout << "Sp pressed!......................................................................\n";
 			    	
 			    	if((!stones_used[SPACE_STONE]) && contains(stones, SPACE_STONE) && (control == 0))
 				{
@@ -1039,7 +1039,7 @@ class Thanos : public Dot
 			    case SDLK_DOWN: mVelY -= DOT_VEL; break;
 			    case SDLK_LEFT: mVelX += DOT_VEL; break;
 			    case SDLK_RIGHT: mVelX -= DOT_VEL; break;
-			    case SDLK_p: pPressed = false; cout << "P released!......................................................................\n";break;
+			    case SDLK_p: pPressed = false; break;
 			}
 		    }
 		
