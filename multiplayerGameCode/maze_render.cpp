@@ -19,7 +19,7 @@ SDL_Texture* loadTexture( std::string path );
 void renderMaze();
 
 int numAveng = 2;
-
+			bool quit = false;
 bool init()
 {
 	//Initialization flag
@@ -432,7 +432,7 @@ void stringToMaze(string s){
   }
     void* MsgLoop(ENetHost* client)
   {
-  	while(true)
+  	while(!quit)
   	{
   		ENetEvent event;
   		while(enet_host_service(client, &event, 0) > 0)
@@ -459,7 +459,7 @@ int main( int argc, char* args[] )
 	// Starting point and top-level control.
 	srand( time(0) ); // seed random number generator.
 	ResetGrid();
-	
+	bool posAssigned = false;
 
 	
 	printf("Please Enter Your Username?\n");
@@ -486,7 +486,7 @@ int main( int argc, char* args[] )
 		else
 		{	
 			//Main loop flag
-			bool quit = false;
+
 
 			//Event handler
 			SDL_Event e;
@@ -512,14 +512,14 @@ int main( int argc, char* args[] )
 			avengers[0].strength = 60;
 			avengers[1].strength = 70;
 			
-			for(int i = 0; i < numAveng; i++)
-			{
-			
-				avengers[i].assignPos();
-				
-				avengers[i].type = AVENGER;
-			
-			}
+					for(int i = 0; i < numAveng; i++)
+					{
+					
+						avengers[i].assignPos();
+						
+						avengers[i].type = AVENGER;
+					
+					}
 			
 			Stone stone[6];
 			
@@ -641,6 +641,7 @@ int main( int argc, char* args[] )
 							
 						}
 						
+						
 						if(control == 0){
 						
 							thanos.handleEvent( e );
@@ -656,10 +657,12 @@ int main( int argc, char* args[] )
 				
 				float time_current =  timer.getTicks() / 1000.f;
 				
-				thanos.time = time_current - xtraTime;
-				
+				if(control==0){
+					thanos.time = time_current - xtraTime;
+				}
 
 				//Move the thanos and avengers and check collision
+				
 				thanos.move(&(avengers[0]), &(avengers[1]));
 				
 				if(!realityActivated)
@@ -906,7 +909,7 @@ int main( int argc, char* args[] )
 				if(string(username)=="thanos"){
 					msg = mazeToString();
 					
-					msg+="*("+to_string(thanos.mPosX)+","+to_string(thanos.mPosY)+","+to_string(thanos.time)+")";
+					msg+="*("+to_string(thanos.mPosX)+","+to_string(thanos.mPosY)+","+to_string(thanos.time)+","+to_string(xPressed)+","+to_string(mPressed)+","+to_string(soulPressed)+","+to_string(rPressed)+","+to_string(realityActivated)+")";
 					
 					for(int i=0;i<6;i++){
 					
@@ -917,11 +920,103 @@ int main( int argc, char* args[] )
 					
 						msg+="*("+to_string(avengers[i].type)+","+to_string(avengers[i].strength)+","+to_string(avengers[i].kill)+")";
 					}
+					msg+="*("+to_string(thanos.num_stones)+",";
+					for(int p= 0;p<thanos.stones.size();p++){
+						if(p==thanos.stones.size()-1){
+							msg+=to_string(stone_type[p])+")";
+						}else{
+							msg+=to_string(stone_type[p])+",";
+						}
+					}
 					
 						char message_data[800000] = "1|";
 				  		strcat(message_data, msg.c_str());
 				  		SendPacket(peer, message_data);
-				  		usleep(1000*1);
+
+				  		
+				  		
+				  		int strIndex = 2;
+						cout<<dataReceived.length()<<endl;
+						string dataR = dataReceived;
+				  		int n = dataR.length();
+						
+//						
+//						msg+="*("+to_string(avengers[i].type)+","+to_string(avengers[i].mPosX)+","+to_string(avengers[i].mPosY)+","+to_string(avengers[i].pPressed)+","+to_string(avengers[i].pPressedInactive)+")";
+						for(int skip=0;skip<numAveng;skip++){
+						
+							if(skip!=0){
+								strIndex+= 3;
+							}
+							
+							int count = 0;
+							while(strIndex<n){
+								string num = "";
+								while(strIndex<n){
+									if(dataR[strIndex]==')'||dataR[strIndex]==','){
+										break;
+									}
+									num+=dataR[strIndex];
+									strIndex++;
+								}
+								
+								
+								int newNum;
+							if(num==""){
+							
+								newNum = 0;
+							
+							}else{
+							newNum = stoi(num);
+							}
+								if(count==0){
+									avengers[skip].type = newNum;
+								}else if(count==1){
+									avengers[skip].mPosX = newNum;
+								}else if (count==2){
+									avengers[skip].mPosY = newNum;
+								}else if (count==3){
+									avengers[skip].pPressed = newNum;
+								}else if (count==4){
+									avengers[skip].pPressedInactive = newNum;
+								}
+								
+								if(dataR[strIndex]==')'){
+									break;
+								}
+								
+								
+								strIndex++;
+								count++;
+							
+							}
+					}
+					
+					
+					
+					strIndex+= 3;
+
+					string num = "";
+					while(strIndex<n){
+						if(dataR[strIndex]==')'||dataR[strIndex]==','){
+							break;
+						}
+						num+=dataR[strIndex];
+						strIndex++;
+					}
+					//cout<<" Nm is "<<num<<endl;
+					if(num==""){
+						thanos.strength = 0;
+					}else{
+						thanos.strength = stoi(num);
+					}
+					
+					cout<<"----------------------P Press -----------------------------"<<endl;
+					for(int skip=0;skip<numAveng;skip++){
+						if(avengers[skip].pPressed){
+							cout<<"A WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW"<<skip<<"  "<<avengers[skip].pPressed<<endl;
+						}
+					
+					}
 				
 				}
 				else{
@@ -953,6 +1048,202 @@ int main( int argc, char* args[] )
 					}
 					
 					
+					
+					
+					strIndex+= 2;
+					int count = 0;
+					while(strIndex<n){
+						string num = "";
+						while(strIndex<n){
+							if(dataR[strIndex]==')'||dataR[strIndex]==','){
+								break;
+							}
+							num+=dataR[strIndex];
+							strIndex++;
+						}
+						
+						
+						
+						int newNum;
+							if(num==""){
+							
+								newNum = 0;
+							
+							}else{
+							newNum = stoi(num);
+							}
+						if(count==0){
+							thanos.mPosX = newNum;
+						}else if(count==1){
+							thanos.mPosY = newNum;
+						}else if(count==2){
+							thanos.time = stof(num);
+						}else if (count==3){
+							xPressed = newNum;
+						}else if (count==4){
+							mPressed = newNum;
+						}else if (count==5){
+							soulPressed = newNum;
+						}else if (count==6){
+							rPressed = newNum;
+						}else if (count==7){
+							realityActivated = newNum;
+						}
+						if(dataR[strIndex]==')'){
+							break;
+						}
+						strIndex++;
+						count++;
+					
+					}
+					
+					for(int skip=0;skip<6;skip++){
+						
+						strIndex+= 3;
+						int count = 0;
+						while(strIndex<n){
+							string num = "";
+							while(strIndex<n){
+								if(dataR[strIndex]==')'||dataR[strIndex]==','){
+									break;
+								}
+								num+=dataR[strIndex];
+								strIndex++;
+							}
+							
+							int newNum;
+							if(num==""){
+							
+								newNum = 0;
+							
+							}else{
+							newNum = stoi(num);
+							}
+							if(count==0){
+								stone[skip].type = newNum;
+							}else if(count==1){
+								stone[skip].pick = newNum;
+							}else if (count==2){
+								stone[skip].mPosX = newNum;
+							}else{
+								stone[skip].mPosY = newNum;
+							}
+							
+							if(dataR[strIndex]==')'){
+								break;
+							}
+							
+							
+							strIndex++;
+							count++;
+						
+						}
+						
+						
+					
+					}
+
+					
+
+					for(int skip=0;skip<numAveng;skip++){
+						
+						strIndex+= 3;
+						int count = 0;
+						while(strIndex<n){
+							string num = "";
+							while(strIndex<n){
+								if(dataR[strIndex]==')'||dataR[strIndex]==','){
+									break;
+								}
+								num+=dataR[strIndex];
+								strIndex++;
+							}
+							
+							int newNum;
+							if(num==""){
+							
+								newNum = 0;
+							
+							}else{
+							newNum = stoi(num);
+							}
+							if(count==0){
+								avengers[skip].type = newNum;
+							}else if(count==1){
+								avengers[skip].strength = newNum;
+							}else if (count==2){
+								avengers[skip].kill = newNum;
+							}
+							
+							if(dataR[strIndex]==')'){
+								break;
+							}
+							
+							
+							strIndex++;
+							count++;
+						
+						}
+					}
+				
+
+
+					strIndex+= 3;
+
+					string num = "";
+					while(strIndex<n){
+						if(dataR[strIndex]==')'||dataR[strIndex]==','){
+							break;
+						}
+						num+=dataR[strIndex];
+						strIndex++;
+					}
+					//cout<<" Nm is "<<num<<endl;
+					if(num==""){
+						thanos.num_stones = 0;
+					}else{
+						thanos.num_stones = stoi(num);
+					}
+//					
+					
+					vector<int> localStones;
+					
+					if(dataR[strIndex]==','){
+						strIndex+=1;
+					}else if(dataR[strIndex]==')'){
+						strIndex+= 3;
+					}
+
+						while(strIndex<n){
+							string num = "";
+							while(strIndex<n){
+								if(dataR[strIndex]==')'||dataR[strIndex]==','){
+									break;
+								}
+								num+=dataR[strIndex];
+								strIndex++;
+							}
+							int newNum;
+							if(num==""){
+							
+								newNum = 0;
+							
+							}else{
+							newNum = stoi(num);
+							}
+							localStones.push_back(newNum);
+														
+							strIndex++;
+					
+						
+						}
+					stone_type = localStones;
+					cout<<" ------------------------------New Print ----------------"<<endl;
+					for(int myBad = 0 ;myBad<localStones.size();myBad++){
+						cout<<localStones[myBad]<<"    ";
+					}
+					cout<<endl;
+										
 					stringToMaze(strMaze);
 					createMaze();
 					renderMaze();
@@ -965,12 +1256,17 @@ int main( int argc, char* args[] )
 					
 					}
 					
+					msg+="*("+to_string(thanos.strength)+")"; 
+					
 					char message_data[800000] = "1|";
 				  		strcat(message_data, msg.c_str());
 				  		SendPacket(peer, message_data);
-				  		usleep(1000*1);
+
 				
 				}
+				
+				
+				
 				
 			
 				

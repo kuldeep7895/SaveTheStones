@@ -97,7 +97,7 @@
   	while(true)
   	{
 
-  		while(enet_host_service(server, &event, 1000) > 0)
+  		while(enet_host_service(server, &event, 0) > 0)
   		{
   			switch(event.type)
   			{

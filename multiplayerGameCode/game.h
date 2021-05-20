@@ -112,6 +112,7 @@ bool mPressed = false;
 bool soulPressed = false;
 bool rPressed = false;
 bool realityActivated = false;
+bool xPressed = false;
 
 class Thanos;
 
@@ -125,7 +126,7 @@ class Dot
 		static const int DOT_HEIGHT = 20;
 
 		//Maximum axis velocity of the dot
-		static const int DOT_VEL = 2;
+		static const int DOT_VEL = 2 ;
 		
 		//Dot's collision box
 		SDL_Rect mCollider;
@@ -225,15 +226,17 @@ class Dot
 		
 		void recomputeStrength(Dot* d)
 		{
-		
 			float temp = 0;
 			
 			cout << "Type\t" << (*d).type << "\t" << type << endl;
 	
 			if(pPressed)
 			{
+				temp = 10;
+				if(xPressed&&((*d).type==1)){
+					temp = temp*2;
+				}
 				
-				temp = 20;
 				pPressedInactive = true;
 			
 			}
@@ -797,7 +800,7 @@ class Thanos : public Dot
 		bool tPressedInactive = false;
 		clock_t tStartCollide;
 		
-		bool xPressed = false;
+		
 		bool xPressedInactive = false;
 		clock_t xStartCollide;
 		
@@ -932,7 +935,7 @@ class Thanos : public Dot
 					xPressed = true; 
 				//	cout << "Initime" << time << endl;
 					xpower_factor = 1;
-					strength += 30;
+					//strength += 30;
 					stones_used[POWER_STONE] = true;
 					
 				//	cout << "Initime" << time << endl;
