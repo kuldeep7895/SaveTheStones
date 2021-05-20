@@ -15,6 +15,7 @@ void close();
 //Loads individual image as texture
 SDL_Texture* loadTexture( std::string path );
 
+clock_t globalClock;
 //Render maze
 void renderMaze();
 
@@ -445,6 +446,17 @@ void stringToMaze(string s){
 
   	// Get first two numbers from the data (data_type and id) and but them in their respective variables
   	sscanf(data,"%d|%d", &data_type, &id);
+  	
+  	if(id==CLIENT_ID){
+  		clock_t time_elapsed;
+  		time_elapsed = clock()- globalClock;
+  		
+  		cout<<"*****************************Time Taken is ---------------------"<<(float)time_elapsed/CLOCKS_PER_SEC<<endl;
+  		
+  		if(((float)time_elapsed/CLOCKS_PER_SEC)>=0.01){
+  			cout<<"*****************************Slow connection ---------------------"<<endl;
+  		}
+  	}
 
   	// Switch between the different data_types
   	switch(data_type)
@@ -864,50 +876,7 @@ int main( int argc, char* args[] )
 				
 				thanos.control = control;
 				
-			/*	switch(control)
-				{
-				
-					case 0:
-						
-						for(int i = 0; i < 2; i++)
-						{
-						
-							if(thanos.check(avengers[i]))
-							{
-								cout << "1...........\n";
-								recomputeStrength(&thanos, &avengers[i]);
-//								thanos.pPressedInactive = true;
-							
-							}
-							
-						}
-						
-						break;
-						
-					case 1:
-						
-						if(avengers[0].check(thanos))
-						{
-							cout << "2...........\n";
-							recomputeStrength(&avengers[0], &thanos);
-							
-						}
-						
-						break;
-					
-					case 2:
-						
-						if(avengers[1].check(thanos))
-						{
-							cout << "3...........\n";
-							recomputeStrength(&avengers[1], &thanos);
-							
-						}
-						
-						break;
-				
-				}*/
-				
+		
 				//Set text to be rendered
 				timeText.str( "" );
 				timeText << "Strengths: Thanos - " << thanos.strength << ", Avenger 1 - " << avengers[0].strength << ", Avenger 2 - " << avengers[1].strength; 
@@ -969,7 +938,7 @@ int main( int argc, char* args[] )
 					//printf( "Unable to render stone type texture!\n" );
 				}
 				
-				if(((thanos.time > 100) && (thanos.num_stones < 6)) || (thanos.strength <= 0))
+				if(((thanos.time > 100) && (thanos.num_stones < 6))||(thanos.strength<0))
 				{
 				
 					//Set text to be rendered
@@ -1014,7 +983,14 @@ int main( int argc, char* args[] )
 					printf( "Unable to render stone count texture!\n" );
 				}
 				
-				if(((thanos.num_stones == 6) && (thanos.time <= 100)) || ((avengers[0].strength <= 0) && (avengers[0].strength <= 0)))
+				bool avenDie = true;
+				for(int i = 0;i<numAveng;i++){
+					if(avengers[i].strength>0){
+						avenDie = false; 
+					}
+				}
+				
+				if(((thanos.num_stones == 6) && (thanos.time <= 100))||avenDie)
 				{
 				
 					//Set text to be rendered
@@ -1073,7 +1049,7 @@ int main( int argc, char* args[] )
 				  		strcat(message_data, msg.c_str());
 				  		SendPacket(peer, message_data);
 
-				  		
+				  		globalClock = clock();
 				  		
 				  		int strIndex = 2;
 						cout<<dataReceived.length()<<endl;
