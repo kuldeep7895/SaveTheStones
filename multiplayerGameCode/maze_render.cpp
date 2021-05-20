@@ -26,7 +26,7 @@ bool init()
 	bool success = true;
 
 	//Initialize SDL
-	if( SDL_Init( SDL_INIT_VIDEO ) < 0 )
+	if( SDL_Init( SDL_INIT_VIDEO | SDL_INIT_AUDIO ) < 0 )
 	{
 		printf( "SDL could not initialize! SDL Error: %s\n", SDL_GetError() );
 		success = false;
@@ -72,6 +72,13 @@ bool init()
 				if( TTF_Init() == -1 )
 				{
 					printf( "SDL_ttf could not initialize! SDL_ttf Error: %s\n", TTF_GetError() );
+					success = false;
+				}
+				
+				//Initialize SDL_mixer
+				if( Mix_OpenAudio( 44100, MIX_DEFAULT_FORMAT, 2, 2048 ) < 0 )
+				{
+					printf( "SDL_mixer could not initialize! SDL_mixer Error: %s\n", Mix_GetError() );
 					success = false;
 				}
 			}
@@ -180,6 +187,43 @@ bool loadMedia()
 		}
 	
 	}
+	
+	//Load music
+	gMusic = Mix_LoadMUS( "sounds/beat.wav" );
+	if( gMusic == NULL )
+	{
+		printf( "Failed to load beat music! SDL_mixer Error: %s\n", Mix_GetError() );
+		success = false;
+	}
+	
+	//Load sound effects
+	gScratch = Mix_LoadWAV( "sounds/scratch.wav" );
+	if( gScratch == NULL )
+	{
+		printf( "Failed to load scratch sound effect! SDL_mixer Error: %s\n", Mix_GetError() );
+		success = false;
+	}
+	
+	gHigh = Mix_LoadWAV( "sounds/high.wav" );
+	if( gHigh == NULL )
+	{
+		printf( "Failed to load high sound effect! SDL_mixer Error: %s\n", Mix_GetError() );
+		success = false;
+	}
+
+	gMedium = Mix_LoadWAV( "sounds/medium.wav" );
+	if( gMedium == NULL )
+	{
+		printf( "Failed to load medium sound effect! SDL_mixer Error: %s\n", Mix_GetError() );
+		success = false;
+	}
+
+	gLow = Mix_LoadWAV( "sounds/low.wav" );
+	if( gLow == NULL )
+	{
+		printf( "Failed to load low sound effect! SDL_mixer Error: %s\n", Mix_GetError() );
+		success = false;
+	}
 
 	return success;
 }
@@ -215,6 +259,20 @@ void close()
 	//Free global font
 	TTF_CloseFont( gFont );
 	gFont = NULL;
+	
+	//Free the sound effects
+	Mix_FreeChunk( gScratch );
+	Mix_FreeChunk( gHigh );
+	Mix_FreeChunk( gMedium );
+	Mix_FreeChunk( gLow );
+	gScratch = NULL;
+	gHigh = NULL;
+	gMedium = NULL;
+	gLow = NULL;
+	
+	//Free the music
+	Mix_FreeMusic( gMusic );
+	gMusic = NULL;
 
 
 	//Destroy window	
@@ -225,6 +283,7 @@ void close()
 
 	//Quit SDL subsystems
 	TTF_Quit();
+	Mix_Quit();
 	IMG_Quit();
 	SDL_Quit();
 }
@@ -545,7 +604,7 @@ int main( int argc, char* args[] )
 			
 			float time_cur;
 			
-			
+			int mix_count = 0;
 			
 			
 			/* Game internet connection */
@@ -639,6 +698,64 @@ int main( int argc, char* args[] )
 									
 							}
 							
+							else
+							{
+							
+								switch( e.key.keysym.sym )
+								{
+									//Play high sound effect
+									case SDLK_1:
+									Mix_PlayChannel( -1, gHigh, 0 );
+									break;
+									
+									//Play medium sound effect
+									case SDLK_2:
+									Mix_PlayChannel( -1, gMedium, 0 );
+									break;
+									
+									//Play low sound effect
+									case SDLK_3:
+									Mix_PlayChannel( -1, gLow, 0 );
+									break;
+									
+									//Play scratch sound effect
+									case SDLK_4:
+									Mix_PlayChannel( -1, gScratch, 0 );
+									break;
+									
+									case SDLK_9:
+									//If there is no music playing
+									if( Mix_PlayingMusic() == 0 )
+									{
+										//Play the music
+										Mix_PlayMusic( gMusic, -1 );
+									}
+									//If music is being played
+									else
+									{
+										//If the music is paused
+										if( Mix_PausedMusic() == 1 )
+										{
+											//Resume the music
+											Mix_ResumeMusic();
+										}
+										//If the music is playing
+										else
+										{
+											//Pause the music
+											Mix_PauseMusic();
+										}
+									}
+									break;
+									
+									case SDLK_0:
+									//Stop the music
+									Mix_HaltMusic();
+									break;
+								}
+							
+							}
+							
 						}
 						
 						
@@ -710,6 +827,13 @@ int main( int argc, char* args[] )
 					{
 					
 						thanos.num_stones++;
+						
+						if(control == 0 && !contains(stone_type, stone[i].type))
+						{
+						
+							Mix_PlayChannel( -1, gHigh, 0 );
+							
+						}
 						stone_type.push_back(stone[i].type);	
 						
 					}
@@ -845,14 +969,22 @@ int main( int argc, char* args[] )
 					//printf( "Unable to render stone type texture!\n" );
 				}
 				
-				if((thanos.time > 100) && (thanos.num_stones < 6))
+				if(((thanos.time > 100) && (thanos.num_stones < 6)) || (thanos.strength <= 0))
 				{
 				
 					//Set text to be rendered
 					timeText.str( "" );
-					timeText << "Lose!" ; 
+					timeText << "Avengers Won!" ; 
 					timer.stop();
 					status = false;
+					
+					if(control == 0 && mix_count == 0)
+					{
+					
+						Mix_PlayChannel( -1, gHigh, 0 );
+						mix_count++;
+						
+					}
 
 					//Render text
 					if( !gLosePromptTexture.loadFromRenderedText( timeText.str().c_str(), textColor ) )
@@ -882,14 +1014,22 @@ int main( int argc, char* args[] )
 					printf( "Unable to render stone count texture!\n" );
 				}
 				
-				if((thanos.num_stones == 6) && (thanos.time <= 100))
+				if(((thanos.num_stones == 6) && (thanos.time <= 100)) || ((avengers[0].strength <= 0) && (avengers[0].strength <= 0)))
 				{
 				
 					//Set text to be rendered
 					timeText.str( "" );
-					timeText << "Win!" ; 
+					timeText << "Thanos Won!" ; 
 					timer.stop();
 					status = false;
+					
+					if(control == 0 && mix_count == 0)
+					{
+					
+						Mix_PlayChannel( -1, gHigh, 0 );
+						mix_count++;
+						
+					}
 
 					//Render text
 					if( !gWinPromptTexture.loadFromRenderedText( timeText.str().c_str(), textColor ) )

@@ -114,6 +114,16 @@ bool rPressed = false;
 bool realityActivated = false;
 bool xPressed = false;
 
+//The music that will be played
+Mix_Music *gMusic = NULL;
+
+//The sound effects that will be used
+Mix_Chunk *gScratch = NULL;
+Mix_Chunk *gHigh = NULL;
+Mix_Chunk *gMedium = NULL;
+Mix_Chunk *gLow = NULL;
+
+
 class Thanos;
 
 
