@@ -19,7 +19,7 @@ clock_t globalClock;
 //Render maze
 void renderMaze();
 
-int numAveng = 2;
+int numAveng = 3;
 			bool quit = false;
 bool init()
 {
@@ -455,7 +455,7 @@ void stringToMaze(string s){
   		
   		
   		
-  		if(((float)time_elapsed/CLOCKS_PER_SEC)>=0.01){
+  		if(((float)time_elapsed/CLOCKS_PER_SEC)>=0.1){
   			cout<<"*****************************Time Taken is ---------------------"<<(float)time_elapsed/CLOCKS_PER_SEC<<endl;
   			cout<<"*****************************Slow connection ---------------------"<<endl;
   			
